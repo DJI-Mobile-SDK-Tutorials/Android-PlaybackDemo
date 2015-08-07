@@ -1,0 +1,48 @@
+<resources>
+
+    <!-- App Name -->
+    <string name="app_name">MediaDownloadDemo</string>
+    
+    <!-- APP Commen String -->
+    <string name="demo_activation_error">Activation Error</string>
+    <string name="demo_activation_error_code">0</string>
+    <string name="demo_activation_message_title">Activation Result</string>
+    <string name="drone_connection_status_disconnect">Disconnected</string>
+    <string name="drone_connection_status_connect">Connected</string>
+    <string name="demo_progress_dialog_title">Downloading</string>
+    
+    
+    <!-- Drone Selection Activity -->
+    <string name="drone_selection_activity_title">Please Select the Type of the Drone</string>
+    <string name="drone_selection_activity_title_ins">Inspire 1</string>
+    <string name="drone_selection_activity_title_p3p">Phantom 3 Professional</string>
+    <string name="drone_selection_activity_title_p3a">Phantom 3 Advanced</string>
+    <string name="drone_selection_activity_title_M100">M100</string>
+    <string name="drone_selection_activity_title_auto_ins">Auto Download for Inspire 1</string>
+    <string name="drone_selection_activity_title_auto_p3p">Auto Download for Phantom 3 Professional</string>
+    <string name="drone_selection_activity_title_auto_M100">Auto Download for M100</string>
+    <string name="drone_selection_activity_desc_ins">Showing how to use the SDK APIs for downloading the media from Inspire1</string>
+    <string name="drone_selection_activity_desc_p3p">Showing how to use the SDK APIs for downloading the media from Phantom 3 Professional</string>
+    <string name="drone_selection_activity_desc_p3a">Showing how to use the SDK APIs for downloading the media from Phantom 3 Advanced</string>
+    <string name="drone_selection_activity_desc_M100">Showing how to use the SDK APIs for downloading the media from M100</string>
+    <string name="drone_selection_activity_desc_auto_ins">Showing how to use tht SDK APIs for automatically downloading the media from the Inspire1</string>
+    <string name="drone_selection_activity_desc_auto_p3p">Showing how to use tht SDK APIs for automatically downloading the media from the Phantom3 Professional</string>
+    <string name="drone_selection_activity_desc_auto_M100">Showing how to use tht SDK APIs for automatically downloading the media from the M100</string>
+    
+    
+    <!-- Playback Protocol Activity -->
+    <string name="playback_protocol_activity_title">Playback Protocol Activity</string>
+    <string name="playback_protocol_capture_button_string">Take Photo</string>
+    <string name="playback_protocol_strat_record_button_string">Start Record</string>
+    <string name="playback_protocol_stop_record_button_string">Stop Record</string>
+    <string name="playback_protocol_capture_mode_button_string">Capture</string>
+    <string name="playback_protocol_record_mode_button_string">Record</string>
+    <string name="playback_protocol_playback_mode_button_string">Playback</string>
+    <string name="playback_protocol_multiple_preview_mode_button_string">Multi-Preview</string>
+    <string name="playback_protocol_edition_mode_button_string">EditionMode</string>
+    <string name="playback_protocol_download_button_string">Download</string>
+    <string name="playback_protocol_delete_button_string">Delete</string>
+    
+    <!-- Auto Download Protocol Activity -->
+    <string name="auto_download_protocol_activity_title">Auto Download Activity</string>
+</resources>

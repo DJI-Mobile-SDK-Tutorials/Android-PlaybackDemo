@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <RelativeLayout 
+        android:id="@+id/surfaceView_PBP"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginBottom="0dp">
+        
+        <dji.sdk.widget.DjiGLSurfaceView
+            android:id="@+id/DjiSurfaceView_PBP"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            />
+    </RelativeLayout>
+    
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:background="@color/black_overlay">
+        
+        <ImageButton 
+            android:id="@+id/ReturnBtnImagePlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:onClick="onReturn"
+            android:scaleType="centerInside"
+            android:src="@drawable/selector_back_button"
+            />
+        
+        <TextView
+            android:id="@+id/ConnectStateItTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text="ConnectionStatus"
+            android:textSize="21sp"
+            android:layout_centerInParent="true"
+            />
+    </RelativeLayout>
+    
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        >"
+        
+        <ImageButton
+            android:id="@+id/PlayVideoBtnPlayback"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="40dp"
+            android:src="@drawable/play_video"
+            android:visibility="gone"
+            android:background="@android:color/transparent"
+            />
+        
+        <ImageButton 
+            android:id="@+id/PauseVideoBtnPlayback"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="40dp"
+            android:src="@drawable/pause_video"
+            android:visibility="gone"
+            android:background="@android:color/transparent"
+        />
+    </RelativeLayout>
+    
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true">
+        
+        <Button 
+            android:id="@+id/CaptureBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/playback_protocol_capture_button_string"
+            android:textSize="14sp"
+            android:visibility="gone"
+            />
+        
+        <Button 
+            android:id="@+id/StartRecordBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/CaptureBtnPlayback"
+            android:text="@string/playback_protocol_strat_record_button_string"
+            android:textSize="14sp"
+            android:visibility="gone"
+            />
+        
+        <Button 
+            android:id="@+id/StopRecordBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/StartRecordBtnPlayback"
+            android:text="@string/playback_protocol_strat_record_button_string"
+            android:textSize="14sp"
+            android:visibility="gone"
+            />
+        
+        <Button
+            android:id="@+id/MultiplePreviewBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/StopRecordBtnPlayback"
+            android:text="@string/playback_protocol_multiple_preview_mode_button_string"
+            android:textSize="14sp"
+            android:visibility="gone"
+            />
+        
+        <Button
+            android:id="@+id/MultiSelectPreviewBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/MultiplePreviewBtnPlayback"
+            android:text="@string/playback_protocol_edition_mode_button_string"
+            android:visibility="gone"
+            android:textSize="14sp" 
+            />
+        
+        <Button
+            android:id="@+id/DownloadBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/MultiSelectPreviewBtnPlayback"
+            android:visibility="gone"
+            android:text="@string/playback_protocol_download_button_string"
+            android:textSize="14sp"
+            />
+        
+        <Button
+            android:id="@+id/DeleteBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/DownloadBtnPlayback"
+            android:visibility="gone"
+            android:text="@string/playback_protocol_delete_button_string"
+            android:textSize="14sp"
+            />
+        
+        <Button 
+            android:id="@+id/PlaybackModeBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/playback_protocol_playback_mode_button_string"
+            android:textSize="14sp"
+            />
+        
+        <Button 
+            android:id="@+id/RecordModeBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/PlaybackModeBtnPlayback"
+            android:text="@string/playback_protocol_record_mode_button_string"
+            android:textSize="14sp"
+            />
+        
+        <Button 
+            android:id="@+id/CaptureModeBtnPlayback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/RecordModeBtnPlayback"
+            android:text="@string/playback_protocol_capture_mode_button_string"
+            android:textSize="14sp"
+            />
+    </RelativeLayout>
+    
+    <com.dji.download.demo.PlaybackGridView
+        android:id="@+id/GridView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="57dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginBottom="57dp"
+        android:numColumns="4"
+        android:verticalSpacing="8dp"
+        android:horizontalSpacing="8dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"/>
+</RelativeLayout>
