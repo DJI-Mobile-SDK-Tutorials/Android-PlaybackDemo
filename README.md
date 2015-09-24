@@ -1069,4 +1069,3 @@ Over the course of this tutorial, you have learned how to switch and get the cur
 
 In the next tutorial, we will be implementing the album app for Phantom 3 Advanced. 
 
-
