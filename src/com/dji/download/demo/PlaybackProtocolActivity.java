@@ -20,7 +20,7 @@ import dji.sdk.interfaces.DJICameraModeCallBack;
 import dji.sdk.interfaces.DJICameraPlayBackStateCallBack;
 import dji.sdk.interfaces.DJIExecuteResultCallback;
 import dji.sdk.interfaces.DJIFileDownloadCallBack;
-import dji.sdk.interfaces.DJIGerneralListener;
+import dji.sdk.interfaces.DJIGeneralListener;
 import dji.sdk.interfaces.DJIReceivedVideoDataCallBack;
 import dji.sdk.interfaces.DJIRemoteControllerUpdateAttitudeCallBack;
 import dji.sdk.widget.DjiGLSurfaceView;
@@ -159,7 +159,7 @@ public class PlaybackProtocolActivity extends Activity implements OnClickListene
         new Thread(){
             public void run() {
                 try {
-                    DJIDrone.checkPermission(getApplicationContext(), new DJIGerneralListener() {
+                    DJIDrone.checkPermission(getApplicationContext(), new DJIGeneralListener() {
                         
                         @Override
                         public void onGetPermissionResult(int result) {

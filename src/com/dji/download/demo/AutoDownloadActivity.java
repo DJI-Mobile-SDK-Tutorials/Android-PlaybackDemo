@@ -1,4 +1,4 @@
-/**   
+﻿/**   
  * TODO
  * @Title       : AutoDownloadActivity.java 
  * @Package     : com.dji.download.demo 
@@ -27,7 +27,7 @@ import dji.sdk.api.DJIDroneTypeDef.DJIDroneType;
 import dji.sdk.interfaces.DJICameraModeCallBack;
 import dji.sdk.interfaces.DJIExecuteResultCallback;
 import dji.sdk.interfaces.DJIFileDownloadCallBack;
-import dji.sdk.interfaces.DJIGerneralListener;
+import dji.sdk.interfaces.DJIGeneralListener;
 import dji.sdk.interfaces.DJIReceivedVideoDataCallBack;
 import dji.sdk.widget.DjiGLSurfaceView;
 import android.R.integer;
@@ -205,7 +205,7 @@ public class AutoDownloadActivity extends Activity implements OnClickListener
         new Thread(){
             public void run() {
                 try {
-                    DJIDrone.checkPermission(getApplicationContext(), new DJIGerneralListener() {
+                    DJIDrone.checkPermission(getApplicationContext(), new DJIGeneralListener() {
                         
                         @Override
                         public void onGetPermissionResult(int result) {
