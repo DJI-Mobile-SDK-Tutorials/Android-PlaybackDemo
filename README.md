@@ -595,7 +595,7 @@ To keep the UI logic consistent, we also detect the current status of the camera
 	 new Thread(){
             public void run() {
                 try {
-                    DJIDrone.checkPermission(getApplicationContext(), new DJIGerneralListener() {
+                    DJIDrone.checkPermission(getApplicationContext(), new DJIGeneralListener() {
                         
                         @Override
                         public void onGetPermissionResult(int result) {
