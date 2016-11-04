@@ -127,10 +127,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
             }
         }
 
-        if(!ret) {
-            // The product or the remote controller are not connected.
-            showToast("Disconnected");
-        }
     }
 
     public void showToast(final String msg) {

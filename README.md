@@ -8,7 +8,7 @@ For this demo, you will learn how to use DJI Mobile SDK to access the media reso
 
  - Android Studio 2.0+
  - Android System 4.1+
- - DJI Android SDK 3.3
+ - DJI Android SDK 3.4
 
 ## Not Supported DJI Products
 
@@ -16,6 +16,7 @@ For this demo, you will learn how to use DJI Mobile SDK to access the media reso
  - Phantom 3 Standard
  - Phantom 3 4K
  - Phantom 3 Advanced
+ - Mavic Pro
 
 ## Tutorial
 
