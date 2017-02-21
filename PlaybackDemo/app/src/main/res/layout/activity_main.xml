@@ -180,16 +180,6 @@
         android:layout_width="150dp"
         android:layout_height="75dp"
         android:text=""
-        android:id="@+id/preview_button2"
-        android:layout_alignBottom="@+id/preview_button1"
-        android:layout_toEndOf="@+id/preview_button1"
-        android:layout_marginLeft="-5dp"
-        android:background="@android:color/transparent"/>
-
-    <Button
-        android:layout_width="150dp"
-        android:layout_height="75dp"
-        android:text=""
         android:id="@+id/preview_button6"
         android:layout_toEndOf="@+id/preview_button5"
         android:layout_alignBottom="@+id/preview_button5"
@@ -236,5 +226,16 @@
         android:layout_alignStart="@+id/preview_button4"
         android:layout_marginTop="-10dp"
         android:background="@android:color/transparent"/>
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:text=""
+        android:id="@+id/preview_button2"
+        android:layout_marginLeft="-5dp"
+        android:background="@android:color/transparent"
+        android:layout_alignBaseline="@+id/preview_button1"
+        android:layout_alignBottom="@+id/preview_button1"
+        android:layout_alignStart="@+id/preview_button6" />
 
 </RelativeLayout>

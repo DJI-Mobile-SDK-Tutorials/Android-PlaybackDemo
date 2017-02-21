@@ -7,11 +7,11 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import dji.sdk.products.DJIAircraft;
-import dji.sdk.products.DJIHandHeld;
+import dji.sdk.base.BaseComponent;
+import dji.sdk.base.BaseProduct;
+import dji.sdk.products.Aircraft;
+import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
-import dji.sdk.base.DJIBaseComponent;
-import dji.sdk.base.DJIBaseProduct;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 
@@ -19,7 +19,7 @@ public class PlaybackDemoApplication extends Application{
 
     public static final String FLAG_CONNECTION_CHANGE = "playback_demo_connection_change";
 
-    private static DJIBaseProduct mProduct;
+    private static BaseProduct mProduct;
 
     private Handler mHandler;
 
@@ -27,24 +27,24 @@ public class PlaybackDemoApplication extends Application{
      * This function is used to get the instance of DJIBaseProduct.
      * If no product is connected, it returns null.
      */
-    public static synchronized DJIBaseProduct getProductInstance() {
+    public static synchronized BaseProduct getProductInstance() {
         if (null == mProduct) {
-            mProduct = DJISDKManager.getInstance().getDJIProduct();
+            mProduct = DJISDKManager.getInstance().getProduct();
         }
         return mProduct;
     }
 
-    public static synchronized DJIAircraft getAircraftInstance() {
+    public static synchronized Aircraft getAircraftInstance() {
         if (!isAircraftConnected()) return null;
-        return (DJIAircraft) getProductInstance();
+        return (Aircraft) getProductInstance();
     }
 
     public static boolean isAircraftConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof DJIAircraft;
+        return getProductInstance() != null && getProductInstance() instanceof Aircraft;
     }
 
     public static boolean isHandHeldConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof DJIHandHeld;
+        return getProductInstance() != null && getProductInstance() instanceof HandHeld;
     }
 
     public static boolean isProductModuleAvailable() {
@@ -58,7 +58,7 @@ public class PlaybackDemoApplication extends Application{
 
     public static boolean isPlaybackAvailable() {
         return isCameraModuleAvailable() &&
-                (null != PlaybackDemoApplication.getProductInstance().getCamera().getPlayback());
+                (null != PlaybackDemoApplication.getProductInstance().getCamera().getPlaybackManager());
     }
 
     @Override
@@ -66,18 +66,19 @@ public class PlaybackDemoApplication extends Application{
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper());
         //This is used to start SDK services and initiate SDK.
-        DJISDKManager.getInstance().initSDKManager(this, mDJISDKManagerCallback);
+        DJISDKManager.getInstance().registerApp(this, mDJISDKManagerCallback);
     }
 
     /**
      * When starting SDK services, an instance of interface DJISDKManager.DJISDKManagerCallback will be used to listen to
      * the SDK Registration result and the product changing.
      */
-    private DJISDKManager.DJISDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.DJISDKManagerCallback() {
+
+    private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback = new DJISDKManager.SDKManagerCallback() {
 
         //Listens to the SDK registration result
         @Override
-        public void onGetRegisteredResult(DJIError error) {
+        public void onRegister(DJIError error) {
             if(error == DJISDKError.REGISTRATION_SUCCESS) {
                 DJISDKManager.getInstance().startConnectionToProduct();
                 Handler handler = new Handler(Looper.getMainLooper());
@@ -103,40 +104,40 @@ public class PlaybackDemoApplication extends Application{
 
         //Listens to the connected product changing, including two parts, component changing or product connection changing.
         @Override
-        public void onProductChanged(DJIBaseProduct oldProduct, DJIBaseProduct newProduct) {
+        public void onProductChange(BaseProduct oldProduct, BaseProduct newProduct) {
 
             mProduct = newProduct;
             if(mProduct != null) {
-                mProduct.setDJIBaseProductListener(mDJIBaseProductListener);
+                mProduct.setBaseProductListener(mDJIBaseProductListener);
             }
 
             notifyStatusChange();
         }
     };
 
-    private DJIBaseProduct.DJIBaseProductListener mDJIBaseProductListener = new DJIBaseProduct.DJIBaseProductListener() {
+    private BaseProduct.BaseProductListener mDJIBaseProductListener = new BaseProduct.BaseProductListener() {
 
         @Override
-        public void onComponentChange(DJIBaseProduct.DJIComponentKey key, DJIBaseComponent oldComponent, DJIBaseComponent newComponent) {
+        public void onComponentChange(BaseProduct.ComponentKey key, BaseComponent oldComponent, BaseComponent newComponent) {
 
             if(newComponent != null) {
-                newComponent.setDJIComponentListener(mDJIComponentListener);
+                newComponent.setComponentListener(mDJIComponentListener);
             }
             notifyStatusChange();
         }
 
         @Override
-        public void onProductConnectivityChanged(boolean isConnected) {
+        public void onConnectivityChange(boolean isConnected) {
 
             notifyStatusChange();
         }
 
     };
 
-    private DJIBaseComponent.DJIComponentListener mDJIComponentListener = new DJIBaseComponent.DJIComponentListener() {
+    private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
 
         @Override
-        public void onComponentConnectivityChanged(boolean isConnected) {
+        public void onConnectivityChange(boolean isConnected) {
             notifyStatusChange();
         }
 

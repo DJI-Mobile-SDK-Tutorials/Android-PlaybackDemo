@@ -16,21 +16,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import java.io.File;
-import dji.common.camera.CameraSystemState;
-import dji.common.camera.DJICameraSettingsDef;
+
+import dji.common.camera.SettingsDefinitions;
+import dji.common.camera.SystemState;
 import dji.common.product.Model;
-import dji.common.util.DJICommonCallbacks;
-import dji.sdk.camera.DJICamera;
-import dji.sdk.camera.DJIPlaybackManager;
+import dji.common.util.CommonCallbacks;
+import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.PlaybackManager.*;
+import dji.sdk.camera.PlaybackManager;
 import dji.sdk.codec.DJICodecManager;
-import dji.sdk.base.DJIBaseProduct;
 import dji.common.error.DJIError;
+import dji.sdk.camera.Camera.*;
+import dji.sdk.camera.Camera;
 
 public class MainActivity extends Activity implements TextureView.SurfaceTextureListener,View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
-    protected DJICamera.CameraReceivedVideoDataCallback mReceivedVideoDataCallBack = null;
+    protected VideoDataCallback mReceivedVideoDataCallBack = null;
 
     // Codec for video live view
     protected DJICodecManager mCodecManager = null;
@@ -47,8 +50,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private final int HIDE_DOWNLOAD_PROGRESS_DIALOG = 3;
 
     private boolean isSinglePreview = true;
-    private DJIPlaybackManager.DJICameraPlaybackState playbackState;
-    private DJICamera mCamera;
+    private PlaybackState mPlaybackState;
+    private Camera mCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +63,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         initUI();
 
         // The callback for receiving the raw H264 video data for camera live view
-        mReceivedVideoDataCallBack = new DJICamera.CameraReceivedVideoDataCallback() {
+        mReceivedVideoDataCallBack = new VideoDataCallback() {
 
             @Override
-            public void onResult(byte[] videoBuffer, int size) {
+            public void onReceive(byte[] bytes, int i) {
                 if(mCodecManager != null){
                     // Send the raw H264 video data to codec manager for decoding
-                    mCodecManager.sendDataToDecoder(videoBuffer, size);
+                    mCodecManager.sendDataToDecoder(bytes, i);
                 }else {
                     Log.e(TAG, "mCodecManager is null");
                 }
@@ -194,9 +197,10 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (PlaybackDemoApplication.isPlaybackAvailable()){
 
             if (mCamera != null) {
-                mCamera.setDJICameraUpdatedSystemStateCallback(new DJICamera.CameraUpdatedSystemStateCallback() {
+
+                mCamera.setSystemStateCallback(new SystemState.Callback() {
                     @Override
-                    public void onResult(CameraSystemState cameraSystemState) {
+                    public void onUpdate(SystemState cameraSystemState) {
                         if (null != cameraSystemState) {
 
                             int recordTime = cameraSystemState.getCurrentVideoRecordingTimeInSeconds();
@@ -206,7 +210,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                             final String timeString = String.format("%02d:%02d", minutes, seconds);
                             final boolean isVideoRecording = cameraSystemState.isRecording();
 
-                            final CameraSystemState cameraState = cameraSystemState;
+                            final SystemState cameraState = cameraSystemState;
                             MainActivity.this.runOnUiThread(new Runnable() {
 
                                 @Override
@@ -223,73 +227,73 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                                         recordingTime.setVisibility(View.INVISIBLE);
                                     }
 
-                                    if(cameraState.getCameraMode() != DJICameraSettingsDef.CameraMode.Playback){
+                                    if(cameraState.getMode() != SettingsDefinitions.CameraMode.PLAYBACK){
                                         mPlayVideoBtn.setVisibility(View.INVISIBLE);
                                         mStopVideoBtn.setVisibility(View.INVISIBLE);
                                     }
                                 }
                             });
-
                         }
                     }
                 });
 
-                mCamera.getPlayback().setDJICameraPlayBackStateCallBack(
-                        new DJIPlaybackManager.DJICameraPlayBackStateCallBack() {
-                            @Override
-                            public void onResult(DJIPlaybackManager.DJICameraPlaybackState
-                                                         djiCameraPlaybackState) {
+                mCamera.getPlaybackManager().setPlaybackStateCallback(new PlaybackManager.PlaybackState.CallBack() {
+                    @Override
+                    public void onUpdate(PlaybackManager.PlaybackState playbackState) {
 
-                                if (djiCameraPlaybackState.playbackMode.equals(DJICameraSettingsDef.
-                                        CameraPlaybackMode.MultipleMediaFilesDisplay) ||
-                                        djiCameraPlaybackState.playbackMode.equals(DJICameraSettingsDef.
-                                                CameraPlaybackMode.MediaFilesDownload) ||
-                                        djiCameraPlaybackState.playbackMode.equals(DJICameraSettingsDef.
-                                                CameraPlaybackMode.MultipleMediaFilesDelete)) {
-                                    isSinglePreview = false;
-                                } else {
-                                    isSinglePreview = true;
-                                }
+                        if (null != playbackState) {
 
-                                playbackState = djiCameraPlaybackState;
-
-                                MainActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        if (playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.SinglePhotoPlayback)) {
-
-                                            if (playbackState.mediaFileType.equals(DJICameraSettingsDef.CameraMediaFileType.VIDEO)){
-                                                mPlayVideoBtn.setVisibility(View.VISIBLE);
-                                                mStopVideoBtn.setVisibility(View.INVISIBLE);
-
-                                            }else if(playbackState.mediaFileType.equals(DJICameraSettingsDef.CameraMediaFileType.DNG) || playbackState.mediaFileType.equals(DJICameraSettingsDef.CameraMediaFileType.JPEG))
-                                            {
-                                                mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                                mStopVideoBtn.setVisibility(View.INVISIBLE);
-                                            }
-                                        }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.SingleVideoPlaybackStart)){
-                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                            mStopVideoBtn.setVisibility(View.VISIBLE);
-                                        }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDisplay)){
-                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                            mStopVideoBtn.setVisibility(View.INVISIBLE);
-                                        }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDelete)){
-                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                            mStopVideoBtn.setVisibility(View.INVISIBLE);
-                                        }
-
-                                        if (playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDisplay)){
-                                            mSelectBtn.setText("Select");
-                                        }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDelete)){
-                                            mSelectBtn.setText("Cancel");
-                                        }
-                                    }
-                                });
-
+                            if (playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                    PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW) ||
+                                    playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                            PlaybackMode.MEDIA_FILE_DOWNLOAD) ||
+                                    playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                            PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                                isSinglePreview = false;
+                            } else {
+                                isSinglePreview = true;
                             }
+
+                            mPlaybackState = playbackState;
+
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)) {
+
+                                        if (mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.VIDEO)){
+                                            mPlayVideoBtn.setVisibility(View.VISIBLE);
+                                            mStopVideoBtn.setVisibility(View.INVISIBLE);
+
+                                        }else if(mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.DNG) || mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.JPEG))
+                                        {
+                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                            mStopVideoBtn.setVisibility(View.INVISIBLE);
+                                        }
+                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_VIDEO_PLAYBACK_START)){
+                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                        mStopVideoBtn.setVisibility(View.VISIBLE);
+                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
+                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                        mStopVideoBtn.setVisibility(View.INVISIBLE);
+                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
+                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                        mStopVideoBtn.setVisibility(View.INVISIBLE);
+                                    }
+
+                                    if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
+                                        mSelectBtn.setText("Select");
+                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
+                                        mSelectBtn.setText("Cancel");
+                                    }
+                                }
+                            });
                         }
-                );
+
+                    }
+                });
+
             }
         }
 
@@ -297,7 +301,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     private void initPreviewer() {
 
-        DJIBaseProduct product = PlaybackDemoApplication.getProductInstance();
+        BaseProduct product = PlaybackDemoApplication.getProductInstance();
 
         if (product == null || !product.isConnected()) {
             showToast(getString(R.string.disconnected));
@@ -311,7 +315,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 mCamera = product.getCamera();
                 if (mCamera != null){
                     // Set the callback
-                    mCamera.setDJICameraReceivedVideoDataCallback(mReceivedVideoDataCallBack);
+                    mCamera.setVideoDataCallback(mReceivedVideoDataCallBack);
                 }
             }
         }
@@ -322,7 +326,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (PlaybackDemoApplication.isCameraModuleAvailable()){
             if (mCamera != null){
                 // Reset the callback
-                mCamera.setDJICameraReceivedVideoDataCallback(null);
+                mCamera.setVideoDataCallback(null);
             }
         }
     }
@@ -415,7 +419,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         switch (v.getId()) {
 
             case R.id.btn_playVideo_btn:{
-                mCamera.getPlayback().startVideoPlayback();
+                mCamera.getPlaybackManager().startVideoPlayback();
                 break;
             }
             case R.id.btn_capture:{
@@ -423,163 +427,134 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 break;
             }
             case R.id.btn_shoot_photo_mode:{
-                switchCameraMode(DJICameraSettingsDef.CameraMode.ShootPhoto);
+                switchCameraMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO);
                 break;
             }
             case R.id.btn_record_video_mode:{
-                switchCameraMode(DJICameraSettingsDef.CameraMode.RecordVideo);
+                switchCameraMode(SettingsDefinitions.CameraMode.RECORD_VIDEO);
                 break;
             }
             case R.id.btn_playback_mode:{
-                switchCameraMode(DJICameraSettingsDef.CameraMode.Playback);
+                switchCameraMode(SettingsDefinitions.CameraMode.PLAYBACK);
                 break;
             }
             case R.id.btn_single_btn:{
                 if (!isSinglePreview)
-                    mCamera.getPlayback().enterSinglePreviewModeWithIndex(0);
+                    mCamera.getPlaybackManager().enterSinglePreviewModeWithIndex(0);
                 break;
             }
             case R.id.btn_multi_pre_btn:{
                 if (isSinglePreview)
-                    mCamera.getPlayback().enterMultiplePreviewMode();
+                    mCamera.getPlaybackManager().enterMultiplePreviewMode();
                 break;
             }
             case R.id.btn_stop_btn:{
-                mCamera.getPlayback().stopVideoPlayback();
+                mCamera.getPlaybackManager().stopVideoPlayback();
                 break;
             }
             case R.id.btn_select_btn:{
 
-                if (playbackState == null){
+                if (mPlaybackState == null){
                     break;
                 }
-                if (playbackState.playbackMode.equals(DJICameraSettingsDef.
-                        CameraPlaybackMode.MultipleMediaFilesDisplay)){
+                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.
+                        PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
 
-                    mCamera.getPlayback().enterMultipleEditMode();
+                    mCamera.getPlaybackManager().enterMultipleEditMode();
 
-                }else if (playbackState.playbackMode.equals(DJICameraSettingsDef.
-                        CameraPlaybackMode.MultipleMediaFilesDelete)) {
-                    mCamera.getPlayback().exitMultipleEditMode();
+                }else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.
+                        PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                    mCamera.getPlaybackManager().exitMultipleEditMode();
                 }
 
                 break;
             }
             case R.id.btn_select_all_btn:{
-                if (playbackState == null){
+                if (mPlaybackState == null){
                     break;
                 }
-                if (playbackState.isAllFilesInPageSelected){
-                    mCamera.getPlayback().unselectAllFilesInPage();
+                if (mPlaybackState.isAreAllFilesInPageSelected()){
+                    mCamera.getPlaybackManager().unselectAllFilesInPage();
                 }else{
-                    mCamera.getPlayback().selectAllFilesInPage();
+                    mCamera.getPlaybackManager().selectAllFilesInPage();
                 }
                 break;
             }
             case R.id.btn_delete_btn:{
 
-                if (playbackState == null){
+                if (mPlaybackState == null){
                     break;
                 }
-                if (playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDelete)) {
-                    mCamera.getPlayback().deleteAllSelectedFiles();
+                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                    mCamera.getPlaybackManager().deleteAllSelectedFiles();
 
-                }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.SinglePhotoPlayback)){
-                    mCamera.getPlayback().deleteCurrentPreviewFile();
+                }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)){
+                    mCamera.getPlaybackManager().deleteCurrentPreviewFile();
                 }
                 break;
             }
             case R.id.btn_download_btn:{
 
-                if (playbackState == null){
+                if (mPlaybackState == null){
                     break;
                 }
 
                 File destDir =
                         new File(Environment.getExternalStorageDirectory().getPath() + "/DJI_PlaybackDemo/");
-                if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.SinglePhotoPlayback)) {
-                    mCamera.getPlayback().downloadCurrentPreviewFile(destDir, new DJIPlaybackManager.CameraFileDownloadCallback() {
-                        @Override
-                        public void onStart() {
-                            handler.sendMessage(handler.obtainMessage(SHOW_DOWNLOAD_PROGRESS_DIALOG, null));
-                            if (mDownloadDialog != null) {
-                                mDownloadDialog.setProgress(0);
-                            }
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnStart"));
-                        }
+                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
 
-                        @Override
-                        public void onEnd() {
-                            handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnEnd"));
-                        }
+                    mCamera.getPlaybackManager().downloadSelectedFiles(destDir,
+                            new PlaybackManager.FileDownloadCallback() {
 
-                        @Override
-                        public void onError(Exception exception) {
-                            handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST,
-                                    "download Current Preview File OnError :" + exception.toString()));
-                        }
+                                @Override
+                                public void onStart() {
+                                    handler.sendMessage(handler.obtainMessage(SHOW_DOWNLOAD_PROGRESS_DIALOG, null));
+                                    if (mDownloadDialog != null) {
+                                        mDownloadDialog.setProgress(0);
+                                    }
+                                    handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnStart"));
+                                }
 
-                        @Override
-                        public void onProgressUpdate(int progress) {
-                            if (mDownloadDialog != null) {
-                                mDownloadDialog.setProgress(progress);
-                            }
-                        }
-                    });
+                                @Override
+                                public void onEnd() {
+                                    handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
+                                    handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnEnd"));
+                                }
 
-                }else if (playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDelete)) {
-                    mCamera.getPlayback().downloadSelectedFiles(destDir, new DJIPlaybackManager.CameraFileDownloadCallback() {
+                                @Override
+                                public void onError(Exception e) {
+                                    handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
+                                    handler.sendMessage(handler.obtainMessage(SHOWTOAST,
+                                            "download selected files OnError :" + e.toString()));
+                                }
 
-                        @Override
-                        public void onStart() {
-                            handler.sendMessage(handler.obtainMessage(SHOW_DOWNLOAD_PROGRESS_DIALOG, null));
-                            if (mDownloadDialog != null) {
-                                mDownloadDialog.setProgress(0);
-                            }
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnStart"));
-                        }
+                                @Override
+                                public void onProgressUpdate(int i) {
+                                    if (mDownloadDialog != null) {
+                                        mDownloadDialog.setProgress(i);
+                                    }
+                                }
+                            });
 
-                        @Override
-                        public void onEnd() {
-                            handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST, "download OnEnd"));
-                        }
-
-                        @Override
-                        public void onError(Exception exception) {
-                            handler.sendMessage(handler.obtainMessage(HIDE_DOWNLOAD_PROGRESS_DIALOG, null));
-                            handler.sendMessage(handler.obtainMessage(SHOWTOAST,
-                                    "download selected files OnError :" + exception.toString()));
-                        }
-
-                        @Override
-                        public void onProgressUpdate(int progress) {
-                            if (mDownloadDialog != null) {
-                                mDownloadDialog.setProgress(progress);
-                            }
-                        }
-                    });
                 }
 
                 break;
             }
             case R.id.btn_previous_btn:{
                 if (isSinglePreview){
-                    mCamera.getPlayback().singlePreviewPreviousPage();
+                    mCamera.getPlaybackManager().proceedToPreviousSinglePreviewPage();
                 }
                 else{
-                    mCamera.getPlayback().multiplePreviewPreviousPage();
+                    mCamera.getPlaybackManager().proceedToPreviousMultiplePreviewPage();
                 }
                 break;
             }
             case R.id.btn_next_btn:{
                 if (isSinglePreview) {
-                    mCamera.getPlayback().singlePreviewNextPage();
+                    mCamera.getPlaybackManager().proceedToNextSinglePreviewPage();
                 }
                 else {
-                    mCamera.getPlayback().multiplePreviewNextPage();
+                    mCamera.getPlaybackManager().proceedToNextMultiplePreviewPage();
                 }
                 break;
             }
@@ -620,26 +595,26 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     }
 
     private void previewBtnAction(int var){
-        if ((playbackState != null) && (mCamera != null)){
-            if (playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDelete)){
-                mCamera.getPlayback().toggleFileSelectionAtIndex(var);
-            }else if(playbackState.playbackMode.equals(DJICameraSettingsDef.CameraPlaybackMode.MultipleMediaFilesDisplay)){
-                mCamera.getPlayback().enterSinglePreviewModeWithIndex(var);
+        if ((mPlaybackState != null) && (mCamera != null)){
+            if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
+                mCamera.getPlaybackManager().toggleFileSelectionAtIndex(var);
+            }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
+                mCamera.getPlaybackManager().enterSinglePreviewModeWithIndex(var);
             }
         }
     }
 
-    private void switchCameraMode(DJICameraSettingsDef.CameraMode cameraMode){
+    private void switchCameraMode(SettingsDefinitions.CameraMode cameraMode){
 
         if (mCamera != null) {
-            mCamera.setCameraMode(cameraMode, new DJICommonCallbacks.DJICompletionCallback() {
+            mCamera.setMode(cameraMode, new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onResult(DJIError error) {
+                public void onResult(DJIError djiError) {
 
-                    if (error == null) {
+                    if (djiError == null) {
                         showToast("Switch Camera Mode Succeeded");
                     } else {
-                        showToast(error.getDescription());
+                        showToast(djiError.getDescription());
                     }
                 }
             });
@@ -649,38 +624,46 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     // Method for taking photo
     private void captureAction(){
 
-        DJICameraSettingsDef.CameraMode cameraMode = DJICameraSettingsDef.CameraMode.ShootPhoto;
-
         if (mCamera != null) {
 
-            DJICameraSettingsDef.CameraShootPhotoMode photoMode = DJICameraSettingsDef.CameraShootPhotoMode.Single; // Set the camera capture mode as Single mode
-
-            mCamera.startShootPhoto(photoMode, new DJICommonCallbacks.DJICompletionCallback() {
+            SettingsDefinitions.ShootPhotoMode photoMode = SettingsDefinitions.ShootPhotoMode.SINGLE; // Set the camera capture mode as Single mode
+            mCamera.setShootPhotoMode(photoMode, new CommonCallbacks.CompletionCallback(){
                 @Override
-                public void onResult(DJIError error) {
-                    if (error == null) {
-                        showToast("take photo: success");
-                    } else {
-                        showToast(error.getDescription());
+                public void onResult(DJIError djiError) {
+                    if (null == djiError) {
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mCamera.startShootPhoto(new CommonCallbacks.CompletionCallback() {
+                                    @Override
+                                    public void onResult(DJIError djiError) {
+                                        if (djiError == null) {
+                                            showToast("take photo: success");
+                                        } else {
+                                            showToast(djiError.getDescription());
+                                        }
+                                    }
+                                });
+                            }
+                        }, 2000);
                     }
                 }
-            });  // Execute the startShootPhoto API
+            });
         }
     }
 
     // Method for starting recording
     private void startRecord(){
 
-        DJICameraSettingsDef.CameraMode cameraMode = DJICameraSettingsDef.CameraMode.RecordVideo;
         if (mCamera != null) {
-            mCamera.startRecordVideo(new DJICommonCallbacks.DJICompletionCallback() {
+            mCamera.startRecordVideo(new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onResult(DJIError error)
+                public void onResult(DJIError djiError)
                 {
-                    if (error == null) {
+                    if (djiError == null) {
                         showToast("Record video: success");
                     }else {
-                        showToast(error.getDescription());
+                        showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the startRecordVideo API
@@ -691,14 +674,14 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private void stopRecord(){
 
         if (mCamera != null) {
-            mCamera.stopRecordVideo(new DJICommonCallbacks.DJICompletionCallback() {
+            mCamera.stopRecordVideo(new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onResult(DJIError error)
+                public void onResult(DJIError djiError)
                 {
-                    if(error == null) {
+                    if(djiError == null) {
                         showToast("Stop recording: success");
                     }else {
-                        showToast(error.getDescription());
+                        showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the stopRecordVideo API
