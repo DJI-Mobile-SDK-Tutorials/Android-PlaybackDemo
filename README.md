@@ -1,5 +1,7 @@
 # Android-PlaybackDemo
 
+> **Note: This Sample Project is developed based on Android SDK v3.5.1, an update version for Android SDK v4.0 will be published soon.**
+
 ## Introduction
 
 For this demo, you will learn how to use DJI Mobile SDK to access the media resources in the SD card of the aircraft's camera, preview photos, play videos, download or delete files and so on.
