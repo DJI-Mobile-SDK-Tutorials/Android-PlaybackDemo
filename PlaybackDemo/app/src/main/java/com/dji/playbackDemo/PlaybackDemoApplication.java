@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -37,6 +38,22 @@ public class PlaybackDemoApplication extends Application{
     public static synchronized Aircraft getAircraftInstance() {
         if (!isAircraftConnected()) return null;
         return (Aircraft) getProductInstance();
+    }
+
+    public static synchronized Camera getCameraInstance() {
+
+        if (getProductInstance() == null) return null;
+
+        Camera camera = null;
+
+        if (getProductInstance() instanceof Aircraft){
+            camera = ((Aircraft) getProductInstance()).getCamera();
+
+        } else if (getProductInstance() instanceof HandHeld) {
+            camera = ((HandHeld) getProductInstance()).getCamera();
+        }
+
+        return camera;
     }
 
     public static boolean isAircraftConnected() {

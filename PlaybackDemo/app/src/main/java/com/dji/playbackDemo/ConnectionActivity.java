@@ -18,7 +18,7 @@ import android.widget.Toast;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
 
-public class ConnectionActivity extends Activity implements View.OnClickListener, BaseProduct.VersionCallback {
+public class ConnectionActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
@@ -150,10 +150,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         }
     }
 
-    @Override
-    public void onChange(String oldVersion, String newVersion) {
-        updateVersion();
-    }
 
     @Override
     public void onClick(View v) {
@@ -178,7 +174,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
 
             String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
             mTextConnectionStatus.setText("Status: " + str + " connected");
-            mProduct.setVersionCallback(this);
             updateVersion();
 
             if (null != mProduct.getModel()) {

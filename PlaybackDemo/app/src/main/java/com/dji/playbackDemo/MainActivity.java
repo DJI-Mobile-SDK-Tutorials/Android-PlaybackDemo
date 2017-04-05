@@ -24,16 +24,16 @@ import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.PlaybackManager.*;
 import dji.sdk.camera.PlaybackManager;
+import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
 import dji.common.error.DJIError;
-import dji.sdk.camera.Camera.*;
 import dji.sdk.camera.Camera;
 
 public class MainActivity extends Activity implements TextureView.SurfaceTextureListener,View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
-    protected VideoDataCallback mReceivedVideoDataCallBack = null;
+    protected VideoFeeder.VideoDataCallback mReceivedVideoDataCallBack = null;
 
     // Codec for video live view
     protected DJICodecManager mCodecManager = null;
@@ -63,13 +63,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         initUI();
 
         // The callback for receiving the raw H264 video data for camera live view
-        mReceivedVideoDataCallBack = new VideoDataCallback() {
+        mReceivedVideoDataCallBack = new VideoFeeder.VideoDataCallback() {
 
             @Override
-            public void onReceive(byte[] bytes, int i) {
-                if(mCodecManager != null){
-                    // Send the raw H264 video data to codec manager for decoding
-                    mCodecManager.sendDataToDecoder(bytes, i);
+            public void onReceive(byte[] videoBuffer, int size) {
+                if (mCodecManager != null) {
+                    mCodecManager.sendDataToDecoder(videoBuffer, size);
                 }else {
                     Log.e(TAG, "mCodecManager is null");
                 }
@@ -310,12 +309,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 mVideoSurface.setSurfaceTextureListener(this);
             }
 
-            if (!product.getModel().equals(Model.UnknownAircraft)) {
+            mCamera = product.getCamera();
 
-                mCamera = product.getCamera();
-                if (mCamera != null){
-                    // Set the callback
-                    mCamera.setVideoDataCallback(mReceivedVideoDataCallBack);
+            if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
+                if (VideoFeeder.getInstance().getVideoFeeds() != null
+                        && VideoFeeder.getInstance().getVideoFeeds().size() > 0) {
+                    VideoFeeder.getInstance().getVideoFeeds().get(0).setCallback(mReceivedVideoDataCallBack);
                 }
             }
         }
@@ -326,7 +325,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (PlaybackDemoApplication.isCameraModuleAvailable()){
             if (mCamera != null){
                 // Reset the callback
-                mCamera.setVideoDataCallback(null);
+                VideoFeeder.getInstance().getVideoFeeds().get(0).setCallback(null);
             }
         }
     }
@@ -419,7 +418,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         switch (v.getId()) {
 
             case R.id.btn_playVideo_btn:{
-                mCamera.getPlaybackManager().startVideoPlayback();
+                mCamera.getPlaybackManager().playVideo();
                 break;
             }
             case R.id.btn_capture:{
@@ -449,7 +448,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 break;
             }
             case R.id.btn_stop_btn:{
-                mCamera.getPlaybackManager().stopVideoPlayback();
+                mCamera.getPlaybackManager().stopVideo();
                 break;
             }
             case R.id.btn_select_btn:{
@@ -473,7 +472,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 if (mPlaybackState == null){
                     break;
                 }
-                if (mPlaybackState.isAreAllFilesInPageSelected()){
+                if (mPlaybackState.isAllFilesInPageSelected()){
                     mCamera.getPlaybackManager().unselectAllFilesInPage();
                 }else{
                     mCamera.getPlaybackManager().selectAllFilesInPage();
