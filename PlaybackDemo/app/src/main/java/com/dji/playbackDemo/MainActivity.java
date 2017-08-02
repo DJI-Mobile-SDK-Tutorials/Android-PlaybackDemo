@@ -20,6 +20,7 @@ import java.io.File;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.camera.SystemState;
 import dji.common.product.Model;
+import dji.common.useraccount.UserAccountState;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.PlaybackManager.*;
@@ -28,6 +29,7 @@ import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
 import dji.common.error.DJIError;
 import dji.sdk.camera.Camera;
+import dji.sdk.useraccount.UserAccountManager;
 
 public class MainActivity extends Activity implements TextureView.SurfaceTextureListener,View.OnClickListener {
 
@@ -86,6 +88,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if(mVideoSurface == null) {
             Log.e(TAG, "mVideoSurface is null");
         }
+
+        loginAccount();
     }
 
     @Override
@@ -111,6 +115,22 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         Log.e(TAG, "onDestroy");
         uninitPreviewer();
         super.onDestroy();
+    }
+
+    private void loginAccount(){
+
+        UserAccountManager.getInstance().logIntoDJIUserAccount(this,
+                new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
+                    @Override
+                    public void onSuccess(final UserAccountState userAccountState) {
+                        Log.e(TAG, "Login Success");
+                    }
+                    @Override
+                    public void onFailure(DJIError error) {
+                        showToast("Login Error:"
+                                + error.getDescription());
+                    }
+                });
     }
 
     private void initUI() {

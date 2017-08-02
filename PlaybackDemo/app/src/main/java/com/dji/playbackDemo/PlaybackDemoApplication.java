@@ -102,7 +102,7 @@ public class PlaybackDemoApplication extends Application{
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Register Success", Toast.LENGTH_LONG).show();
                     }
                 });
             } else {
@@ -111,7 +111,7 @@ public class PlaybackDemoApplication extends Application{
 
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "register sdk fails, check network is available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Register sdk fails, check network is available", Toast.LENGTH_LONG).show();
                     }
                 });
 
