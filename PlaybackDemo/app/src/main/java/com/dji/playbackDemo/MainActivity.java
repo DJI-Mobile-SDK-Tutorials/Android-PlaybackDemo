@@ -332,10 +332,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             mCamera = product.getCamera();
 
             if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
-                if (VideoFeeder.getInstance().getVideoFeeds() != null
-                        && VideoFeeder.getInstance().getVideoFeeds().size() > 0) {
-                    VideoFeeder.getInstance().getVideoFeeds().get(0).setCallback(mReceivedVideoDataCallBack);
-                }
+                VideoFeeder.getInstance().getPrimaryVideoFeed().setCallback(mReceivedVideoDataCallBack);
             }
         }
     }
@@ -345,7 +342,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (PlaybackDemoApplication.isCameraModuleAvailable()){
             if (mCamera != null){
                 // Reset the callback
-                VideoFeeder.getInstance().getVideoFeeds().get(0).setCallback(null);
+                VideoFeeder.getInstance().getPrimaryVideoFeed().setCallback(null);
             }
         }
     }
