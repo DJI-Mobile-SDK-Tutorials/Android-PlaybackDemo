@@ -489,7 +489,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 if (mPlaybackState == null){
                     break;
                 }
-                if (mPlaybackState.isAllFilesInPageSelected()){
+
+                if (mPlaybackState.areAllFilesInPageSelected()){
                     mCamera.getPlaybackManager().unselectAllFilesInPage();
                 }else{
                     mCamera.getPlaybackManager().selectAllFilesInPage();
