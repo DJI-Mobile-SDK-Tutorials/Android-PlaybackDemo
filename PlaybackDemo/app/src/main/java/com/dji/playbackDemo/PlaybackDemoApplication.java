@@ -24,9 +24,6 @@ public class PlaybackDemoApplication extends Application{
     public static final String FLAG_CONNECTION_CHANGE = "playback_demo_connection_change";
 
     private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback;
-    private BaseProduct.BaseProductListener mDJIBaseProductListener;
-    private BaseComponent.ComponentListener mDJIComponentListener;
-
 
     private static BaseProduct mProduct;
     private Handler mHandler;
@@ -103,32 +100,6 @@ public class PlaybackDemoApplication extends Application{
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper());
-        mDJIComponentListener = new BaseComponent.ComponentListener() {
-
-            @Override
-            public void onConnectivityChange(boolean isConnected) {
-                notifyStatusChange();
-            }
-
-        };
-        mDJIBaseProductListener = new BaseProduct.BaseProductListener() {
-
-            @Override
-            public void onComponentChange(BaseProduct.ComponentKey key, BaseComponent oldComponent, BaseComponent newComponent) {
-
-                if(newComponent != null) {
-                    newComponent.setComponentListener(mDJIComponentListener);
-                }
-                notifyStatusChange();
-            }
-
-            @Override
-            public void onConnectivityChange(boolean isConnected) {
-
-                notifyStatusChange();
-            }
-
-        };
 
         /**
          * When starting SDK services, an instance of interface DJISDKManager.DJISDKManagerCallback will be used to listen to
@@ -167,16 +138,37 @@ public class PlaybackDemoApplication extends Application{
                 Log.e("TAG", error.toString());
             }
 
-            //Listens to the connected product changing, including two parts, component changing or product connection changing.
             @Override
-            public void onProductChange(BaseProduct oldProduct, BaseProduct newProduct) {
+            public void onProductDisconnect() {
+                Log.d("TAG", "onProductDisconnect");
+                notifyStatusChange();
+            }
+            @Override
+            public void onProductConnect(BaseProduct baseProduct) {
+                Log.d("TAG", String.format("onProductConnect newProduct:%s", baseProduct));
+                notifyStatusChange();
 
-                mProduct = newProduct;
-                if(mProduct != null) {
-                    mProduct.setBaseProductListener(mDJIBaseProductListener);
+            }
+            @Override
+            public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
+                                          BaseComponent newComponent) {
+                if (newComponent != null) {
+                    newComponent.setComponentListener(new BaseComponent.ComponentListener() {
+
+                        @Override
+                        public void onConnectivityChange(boolean isConnected) {
+                            Log.d("TAG", "onComponentConnectivityChanged: " + isConnected);
+                            notifyStatusChange();
+                        }
+                    });
                 }
 
-                notifyStatusChange();
+                Log.d("TAG",
+                        String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
+                                componentKey,
+                                oldComponent,
+                                newComponent));
+
             }
         };
         //Check the permissions before registering the application for android system 6.0 above.
