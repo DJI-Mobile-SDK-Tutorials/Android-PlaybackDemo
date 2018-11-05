@@ -35,7 +35,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     private static final String TAG = MainActivity.class.getName();
 
-    protected VideoFeeder.VideoDataCallback mReceivedVideoDataCallBack = null;
+    protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
 
     // Codec for video live view
     protected DJICodecManager mCodecManager = null;
@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         initUI();
 
         // The callback for receiving the raw H264 video data for camera live view
-        mReceivedVideoDataCallBack = new VideoFeeder.VideoDataCallback() {
+        mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
 
             @Override
             public void onReceive(byte[] videoBuffer, int size) {
@@ -332,7 +332,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             mCamera = product.getCamera();
 
             if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
-                VideoFeeder.getInstance().getPrimaryVideoFeed().setCallback(mReceivedVideoDataCallBack);
+                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
             }
         }
     }
@@ -342,7 +342,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (PlaybackDemoApplication.isCameraModuleAvailable()){
             if (mCamera != null){
                 // Reset the callback
-                VideoFeeder.getInstance().getPrimaryVideoFeed().setCallback(null);
+                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
             }
         }
     }
