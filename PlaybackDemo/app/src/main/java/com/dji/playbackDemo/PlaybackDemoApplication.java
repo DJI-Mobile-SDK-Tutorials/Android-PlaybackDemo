@@ -15,6 +15,7 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
+import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
@@ -170,6 +171,11 @@ public class PlaybackDemoApplication extends Application{
                                 newComponent));
 
             }
+            @Override
+            public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
+
+            }
+
         };
         //Check the permissions before registering the application for android system 6.0 above.
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
