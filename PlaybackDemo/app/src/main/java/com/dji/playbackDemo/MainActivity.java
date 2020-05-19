@@ -255,64 +255,64 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                         }
                     }
                 });
+                PlaybackManager playbackManager = mCamera.getPlaybackManager();
+                if (playbackManager != null) {
+                    playbackManager.setPlaybackStateCallback(new PlaybackManager.PlaybackState.CallBack() {
+                        @Override
+                        public void onUpdate(PlaybackManager.PlaybackState playbackState) {
 
-                mCamera.getPlaybackManager().setPlaybackStateCallback(new PlaybackManager.PlaybackState.CallBack() {
-                    @Override
-                    public void onUpdate(PlaybackManager.PlaybackState playbackState) {
+                            if (null != playbackState) {
 
-                        if (null != playbackState) {
+                                if (playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                        PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW) ||
+                                        playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                                PlaybackMode.MEDIA_FILE_DOWNLOAD) ||
+                                        playbackState.getPlaybackMode().equals(SettingsDefinitions.
+                                                PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                                    isSinglePreview = false;
+                                } else {
+                                    isSinglePreview = true;
+                                }
 
-                            if (playbackState.getPlaybackMode().equals(SettingsDefinitions.
-                                    PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW) ||
-                                    playbackState.getPlaybackMode().equals(SettingsDefinitions.
-                                            PlaybackMode.MEDIA_FILE_DOWNLOAD) ||
-                                    playbackState.getPlaybackMode().equals(SettingsDefinitions.
-                                            PlaybackMode.MULTIPLE_FILES_EDIT)) {
-                                isSinglePreview = false;
-                            } else {
-                                isSinglePreview = true;
-                            }
+                                mPlaybackState = playbackState;
 
-                            mPlaybackState = playbackState;
+                                MainActivity.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
 
-                            MainActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
+                                        if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)) {
 
-                                    if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)) {
+                                            if (mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.VIDEO)) {
+                                                mPlayVideoBtn.setVisibility(View.VISIBLE);
+                                                mStopVideoBtn.setVisibility(View.INVISIBLE);
 
-                                        if (mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.VIDEO)){
-                                            mPlayVideoBtn.setVisibility(View.VISIBLE);
+                                            } else if (mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.DNG) || mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.JPEG)) {
+                                                mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                                mStopVideoBtn.setVisibility(View.INVISIBLE);
+                                            }
+                                        } else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_VIDEO_PLAYBACK_START)) {
+                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
+                                            mStopVideoBtn.setVisibility(View.VISIBLE);
+                                        } else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)) {
+                                            mPlayVideoBtn.setVisibility(View.INVISIBLE);
                                             mStopVideoBtn.setVisibility(View.INVISIBLE);
-
-                                        }else if(mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.DNG) || mPlaybackState.getFileType().equals(SettingsDefinitions.FileType.JPEG))
-                                        {
+                                        } else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
                                             mPlayVideoBtn.setVisibility(View.INVISIBLE);
                                             mStopVideoBtn.setVisibility(View.INVISIBLE);
                                         }
-                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_VIDEO_PLAYBACK_START)){
-                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                        mStopVideoBtn.setVisibility(View.VISIBLE);
-                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
-                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                        mStopVideoBtn.setVisibility(View.INVISIBLE);
-                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
-                                        mPlayVideoBtn.setVisibility(View.INVISIBLE);
-                                        mStopVideoBtn.setVisibility(View.INVISIBLE);
-                                    }
 
-                                    if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
-                                        mSelectBtn.setText("Select");
-                                    }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
-                                        mSelectBtn.setText("Cancel");
+                                        if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)) {
+                                            mSelectBtn.setText("Select");
+                                        } else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                                            mSelectBtn.setText("Cancel");
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
+
                         }
-
-                    }
-                });
-
+                    });
+                }
             }
         }
 
@@ -431,11 +431,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     @Override
     public void onClick(View v) {
-
+        PlaybackManager playbackManager = mCamera.getPlaybackManager();
         switch (v.getId()) {
 
             case R.id.btn_playVideo_btn:{
-                mCamera.getPlaybackManager().playVideo();
+                if (playbackManager != null) {
+                    playbackManager.playVideo();
+                }
                 break;
             }
             case R.id.btn_capture:{
@@ -455,17 +457,18 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 break;
             }
             case R.id.btn_single_btn:{
-                if (!isSinglePreview)
-                    mCamera.getPlaybackManager().enterSinglePreviewModeWithIndex(0);
+                if (!isSinglePreview && playbackManager != null) {
+                    playbackManager.enterSinglePreviewModeWithIndex(0);
+                }
                 break;
             }
             case R.id.btn_multi_pre_btn:{
-                if (isSinglePreview)
-                    mCamera.getPlaybackManager().enterMultiplePreviewMode();
+                if (isSinglePreview && playbackManager != null)
+                    playbackManager.enterMultiplePreviewMode();
                 break;
             }
             case R.id.btn_stop_btn:{
-                mCamera.getPlaybackManager().stopVideo();
+                playbackManager.stopVideo();
                 break;
             }
             case R.id.btn_select_btn:{
@@ -474,13 +477,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                     break;
                 }
                 if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.
-                        PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
+                        PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW) && playbackManager != null){
 
-                    mCamera.getPlaybackManager().enterMultipleEditMode();
+                    playbackManager.enterMultipleEditMode();
 
                 }else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.
-                        PlaybackMode.MULTIPLE_FILES_EDIT)) {
-                    mCamera.getPlaybackManager().exitMultipleEditMode();
+                        PlaybackMode.MULTIPLE_FILES_EDIT) && playbackManager != null) {
+                    playbackManager.exitMultipleEditMode();
                 }
 
                 break;
@@ -490,10 +493,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                     break;
                 }
 
-                if (mPlaybackState.areAllFilesInPageSelected()){
-                    mCamera.getPlaybackManager().unselectAllFilesInPage();
-                }else{
-                    mCamera.getPlaybackManager().selectAllFilesInPage();
+                if (playbackManager != null) {
+                    if (mPlaybackState.areAllFilesInPageSelected()) {
+                        playbackManager.unselectAllFilesInPage();
+                    } else {
+                        playbackManager.selectAllFilesInPage();
+                    }
                 }
                 break;
             }
@@ -502,11 +507,13 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 if (mPlaybackState == null){
                     break;
                 }
-                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
-                    mCamera.getPlaybackManager().deleteAllSelectedFiles();
+                if (playbackManager != null) {
+                    if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                        playbackManager.deleteAllSelectedFiles();
 
-                }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)){
-                    mCamera.getPlaybackManager().deleteCurrentPreviewFile();
+                    } else if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.SINGLE_PHOTO_PREVIEW)) {
+                        playbackManager.deleteCurrentPreviewFile();
+                    }
                 }
                 break;
             }
@@ -518,9 +525,9 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
                 File destDir =
                         new File(Environment.getExternalStorageDirectory().getPath() + "/DJI_PlaybackDemo/");
-                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)) {
+                if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT) && playbackManager != null) {
 
-                    mCamera.getPlaybackManager().downloadSelectedFiles(destDir,
+                    playbackManager.downloadSelectedFiles(destDir,
                             new PlaybackManager.FileDownloadCallback() {
 
                                 @Override
@@ -558,20 +565,22 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 break;
             }
             case R.id.btn_previous_btn:{
-                if (isSinglePreview){
-                    mCamera.getPlaybackManager().proceedToPreviousSinglePreviewPage();
-                }
-                else{
-                    mCamera.getPlaybackManager().proceedToPreviousMultiplePreviewPage();
+                if (playbackManager != null) {
+                    if (isSinglePreview) {
+                        playbackManager.proceedToPreviousSinglePreviewPage();
+                    } else {
+                        playbackManager.proceedToPreviousMultiplePreviewPage();
+                    }
                 }
                 break;
             }
             case R.id.btn_next_btn:{
-                if (isSinglePreview) {
-                    mCamera.getPlaybackManager().proceedToNextSinglePreviewPage();
-                }
-                else {
-                    mCamera.getPlaybackManager().proceedToNextMultiplePreviewPage();
+                if (playbackManager != null) {
+                    if (isSinglePreview) {
+                        playbackManager.proceedToNextSinglePreviewPage();
+                    } else {
+                        playbackManager.proceedToNextMultiplePreviewPage();
+                    }
                 }
                 break;
             }
@@ -612,11 +621,16 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     }
 
     private void previewBtnAction(int var){
+        PlaybackManager playbackManager = mCamera.getPlaybackManager();
         if ((mPlaybackState != null) && (mCamera != null)){
             if (mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_FILES_EDIT)){
-                mCamera.getPlaybackManager().toggleFileSelectionAtIndex(var);
+                if (playbackManager != null) {
+                    playbackManager.toggleFileSelectionAtIndex(var);
+                }
             }else if(mPlaybackState.getPlaybackMode().equals(SettingsDefinitions.PlaybackMode.MULTIPLE_MEDIA_FILE_PREVIEW)){
-                mCamera.getPlaybackManager().enterSinglePreviewModeWithIndex(var);
+                if (playbackManager != null) {
+                    playbackManager.enterSinglePreviewModeWithIndex(var);
+                }
             }
         }
     }
