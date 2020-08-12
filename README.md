@@ -8,7 +8,7 @@ For this demo, you will learn how to use DJI Mobile SDK to access the media reso
 
  - Android Studio 2.0+
  - Android System 4.1+
- - DJI Android SDK 4.12
+ - DJI Android SDK 4.13
 
 ## Not Supported DJI Products
 
